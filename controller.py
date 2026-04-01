@@ -23,11 +23,16 @@ class ElevatorController:
         threading.Thread(target=self.run).start()
     
     
+    
+    def btn_bind(self):
+        for floor, button in app.buttons.items():
+            button.configure(command=lambda f = floor: controller.add_call(f))
         
         
         
 if __name__ == "__main__":
     app = ElevatorApp()
     controller = ElevatorController(app)
+    
     controller.start()
     app.mainloop()
