@@ -22,6 +22,19 @@ class ElevatorController:
         self.running = True
         threading.Thread(target=self.run).start()
     
+    def run(self):
+        while self.running:
+            target = self.get_next_call()
+            
+            if target is None:
+                time.sleep(0.5)
+                continue
+            
+    
+    def get_next_call(self):
+        all_calls = list(self.up_calls | self.down_calls | self.internal_calls)
+        return all_calls[0] if all_calls else None
+    
     
     
     def btn_bind(self):
