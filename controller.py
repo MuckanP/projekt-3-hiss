@@ -10,34 +10,35 @@ class ElevatorController:
 
         self.app = app
 
-        self.up_calls = set()
-        self.down_calls = set()
-        self.internal_calls = set()
+        self.requests = set()
+
+        self.direction = "up"
 
         self.running = False
 
         self.bind_buttons()
 
-    def add_call(self, floor):
-
-        print(f"Call added for floor {floor}")
-
-        if floor > self.app.current_floor:
-            self.up_calls.add(floor)
-
-        elif floor < self.app.current_floor:
-            self.down_calls.add(floor)
-
-        else:
-            self.internal_calls.add(floor)
-
     def bind_buttons(self):
 
+        # Outside buttons
         for floor, button in self.app.buttons.items():
 
             button.configure(
-                command=lambda f=floor: self.add_call(f)
+                command=lambda f=floor: self.add_request(f)
             )
+
+        # Inside buttons
+        for floor, button in self.app.internal_buttons.items():
+
+            button.configure(
+                command=lambda f=floor: self.add_request(f)
+            )
+
+    def add_request(self, floor):
+
+        print(f"Request added: {floor}")
+
+        self.requests.add(floor)
 
     def start(self):
 
@@ -52,68 +53,79 @@ class ElevatorController:
 
         while self.running:
 
-            target = self.get_next_call()
-
-            if target is None:
+            if not self.requests:
                 time.sleep(0.2)
                 continue
 
-            if target > self.app.current_floor:
-                self.move_up(target)
+            next_floor = self.get_next_floor_scan()
 
-            elif target < self.app.current_floor:
-                self.move_down(target)
+            if next_floor is None:
+                continue
 
-            else:
-                self.stop_at_floor()
+            self.move_to_floor(next_floor)
 
-    def get_next_call(self):
+    def get_next_floor_scan(self):
 
-        all_calls = list(
-            self.up_calls
-            | self.down_calls
-            | self.internal_calls
+        current = self.app.current_floor
+
+        higher = sorted(
+            [f for f in self.requests if f > current]
         )
 
-        return all_calls[0] if all_calls else None
+        lower = sorted(
+            [f for f in self.requests if f < current],
+            reverse=True
+        )
 
-    def move_up(self, target):
+        # ======================
+        # SCAN ALGORITHM
+        # ======================
 
-        while self.app.current_floor < target:
+        if self.direction == "up":
 
-            time.sleep(1)
+            if higher:
+                return higher[0]
 
-            if self.app.current_floor == -1:
-                self.app.current_floor = 1
+            self.direction = "down"
+
+            if lower:
+                return lower[0]
+
+        else:
+
+            if lower:
+                return lower[0]
+
+            self.direction = "up"
+
+            if higher:
+                return higher[0]
+
+        return None
+
+    def move_to_floor(self, target):
+
+        while self.app.current_floor != target:
+
+            time.sleep(2)
+
+            if target > self.app.current_floor:
+
+                if self.app.current_floor == -1:
+                    self.app.current_floor = 1
+
+                else:
+                    self.app.current_floor += 1
 
             else:
-                self.app.current_floor += 1
 
-            print("Moving up:", self.app.current_floor)
+                if self.app.current_floor == 1:
+                    self.app.current_floor = -1
 
-            self.app.update_indicator(
-                self.app.current_floor
-            )
+                else:
+                    self.app.current_floor -= 1
 
-            self.app.animate_to_floor(
-                self.app.current_floor
-            )
-
-        self.stop_at_floor()
-
-    def move_down(self, target):
-
-        while self.app.current_floor > target:
-
-            time.sleep(1)
-
-            if self.app.current_floor == 1:
-                self.app.current_floor = -1
-
-            else:
-                self.app.current_floor -= 1
-
-            print("Moving down:", self.app.current_floor)
+            print("Current floor:", self.app.current_floor)
 
             self.app.update_indicator(
                 self.app.current_floor
@@ -131,11 +143,9 @@ class ElevatorController:
 
         print(f"Stopping at floor {floor}")
 
-        self.up_calls.discard(floor)
-        self.down_calls.discard(floor)
-        self.internal_calls.discard(floor)
+        self.requests.discard(floor)
 
-        time.sleep(1)
+        time.sleep(2)
 
 
 if __name__ == "__main__":
