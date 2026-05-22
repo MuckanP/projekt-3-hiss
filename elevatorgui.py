@@ -155,24 +155,22 @@ class ElevatorApp(ctk.CTk):
 
     def animate_step(self, target_y):
 
-        if abs(self.current_y - target_y) < 1:
+        distance = target_y - self.current_y
+
+        if abs(distance) < 0.5:
             return
 
-        direction = 1 if target_y > self.current_y else -1
+        speed = max(abs(distance) * 0.08, 0.5)
 
-        self.current_y += direction * 1
+        direction = 1 if distance > 0 else -1
 
-        self.canvas.move(
-            self.box,
-            0,
-            direction * 1
-        )
+        movement = direction * speed
 
-        # MUCH slower animation
-        self.after(
-            25,
-            lambda: self.animate_step(target_y)
-        )
+        self.current_y += movement
+
+        self.canvas.move(self.box, 0, movement)
+
+        self.after(16, lambda: self.animate_step(target_y))
 
 
 if __name__ == "__main__":

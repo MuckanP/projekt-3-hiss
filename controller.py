@@ -107,31 +107,19 @@ class ElevatorController:
 
         while self.app.current_floor != target:
 
-            time.sleep(2)
+            next_floor = self.get_next_step(target)
 
-            if target > self.app.current_floor:
+            print(f"Moving from {self.app.current_floor} -> {next_floor}")
 
-                if self.app.current_floor == -1:
-                    self.app.current_floor = 1
+            self.app.animate_to_floor(next_floor)
 
-                else:
-                    self.app.current_floor += 1
+            self.wait_for_animation(next_floor)
 
-            else:
-
-                if self.app.current_floor == 1:
-                    self.app.current_floor = -1
-
-                else:
-                    self.app.current_floor -= 1
+            self.app.current_floor = next_floor
 
             print("Current floor:", self.app.current_floor)
 
             self.app.update_indicator(
-                self.app.current_floor
-            )
-
-            self.app.animate_to_floor(
                 self.app.current_floor
             )
 
@@ -146,6 +134,31 @@ class ElevatorController:
         self.requests.discard(floor)
 
         time.sleep(2)
+    
+    def get_next_step(self, target):
+
+        if target > self.app.current_floor:
+
+            if self.app.current_floor == -1:
+               return 1
+
+            return self.app.current_floor + 1
+
+        else:
+            if self.app.current_floor == 1:
+                return -1
+
+            return self.app.current_floor - 1
+
+
+    def wait_for_animation(self, target_floor):
+
+        target_index = self.app.floor_positions[target_floor]
+
+        target_y = 10 + target_index * 42
+
+        while abs(self.app.current_y - target_y) > 2:
+            time.sleep(0.01)
 
 
 if __name__ == "__main__":
