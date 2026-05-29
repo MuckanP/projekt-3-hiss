@@ -11,7 +11,7 @@ class ElevatorApp(ctk.CTk):
     def __init__(self):
         super().__init__()
 
-        self.title("SCAN Elevator Simulation")
+        self.title("Elevator Simulation")
         self.geometry("900x700")
 
         self.floors = [-2, -1] + list(range(1, 11))
@@ -125,11 +125,11 @@ class ElevatorApp(ctk.CTk):
         debug_frame = ctk.CTkFrame(self)
         debug_frame.pack(side="bottom", pady=20)
 
-        debug_title = ctk.CTkLabel(debug_frame, text="Controller Debug", font=("Consolas", 18))
+        debug_title = ctk.CTkLabel(debug_frame, text="Controller Debug", font=("Arial", 18))
 
         debug_title.pack(pady=5)
 
-        self.debug_box = ctk.CTkTextbox(debug_frame, width=500, height=180, font=("Consolas", 14))
+        self.debug_box = ctk.CTkTextbox(debug_frame, width=500, height=180, font=("Arial", 14))
 
         self.debug_box.pack(padx=10, pady=10)
     
