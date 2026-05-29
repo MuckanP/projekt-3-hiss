@@ -65,7 +65,7 @@ class ElevatorController:
             self.move_to_floor(next_floor)
 
     def get_next_floor_scan(self):
-
+        
         current = self.app.current_floor
 
         higher = sorted(
@@ -76,10 +76,6 @@ class ElevatorController:
             [f for f in self.requests if f < current],
             reverse=True
         )
-
-        # ======================
-        # SCAN ALGORITHM
-        # ======================
 
         if self.direction == "up":
 
@@ -106,22 +102,16 @@ class ElevatorController:
     def move_to_floor(self, target):
 
         while self.app.current_floor != target:
-
+            
             next_floor = self.get_next_step(target)
-
             print(f"Moving from {self.app.current_floor} -> {next_floor}")
-
             self.app.animate_to_floor(next_floor)
 
-            self.wait_for_animation(next_floor)
+            time.sleep(1) #tid mellan våningar
 
             self.app.current_floor = next_floor
-
             print("Current floor:", self.app.current_floor)
-
-            self.app.update_indicator(
-                self.app.current_floor
-            )
+            self.app.update_indicator(self.app.current_floor)
 
         self.stop_at_floor()
 
@@ -149,16 +139,6 @@ class ElevatorController:
                 return -1
 
             return self.app.current_floor - 1
-
-
-    def wait_for_animation(self, target_floor):
-
-        target_index = self.app.floor_positions[target_floor]
-
-        target_y = 10 + target_index * 42
-
-        while abs(self.app.current_y - target_y) > 2:
-            time.sleep(0.01)
 
 
 if __name__ == "__main__":

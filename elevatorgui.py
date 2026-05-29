@@ -1,3 +1,5 @@
+from turtle import distance
+
 import customtkinter as ctk
 
 ctk.set_appearance_mode("dark")
@@ -26,10 +28,6 @@ class ElevatorApp(ctk.CTk):
         self.update_indicator(self.current_floor)
 
     def create_layout(self):
-
-        # =========================
-        # OUTSIDE PANEL
-        # =========================
 
         outside_frame = ctk.CTkFrame(self)
         outside_frame.pack(side="left", padx=20, pady=20)
@@ -67,10 +65,6 @@ class ElevatorApp(ctk.CTk):
 
             self.floor_positions[floor] = i
 
-        # =========================
-        # ELEVATOR SHAFT
-        # =========================
-
         shaft_frame = ctk.CTkFrame(self)
         shaft_frame.pack(side="left", padx=40)
 
@@ -101,10 +95,6 @@ class ElevatorApp(ctk.CTk):
         )
 
         self.current_y = 10
-
-        # =========================
-        # INSIDE ELEVATOR PANEL
-        # =========================
 
         inside_frame = ctk.CTkFrame(self)
         inside_frame.pack(side="right", padx=20, pady=20)
@@ -158,18 +148,16 @@ class ElevatorApp(ctk.CTk):
         distance = target_y - self.current_y
 
         if abs(distance) < 0.5:
+            self.current_y = target_y
             return
 
-        speed = max(abs(distance) * 0.08, 0.5)
+        movement = distance * 0.08 #mjukare animationer
 
-        direction = 1 if distance > 0 else -1
-
-        movement = direction * speed
+        if abs(movement) < 0.3: #minimal hastighet
+            movement = 0.3 if movement > 0 else -0.3
 
         self.current_y += movement
-
         self.canvas.move(self.box, 0, movement)
-
         self.after(16, lambda: self.animate_step(target_y))
 
 
