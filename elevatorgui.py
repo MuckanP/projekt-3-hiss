@@ -26,6 +26,9 @@ class ElevatorApp(ctk.CTk):
         self.create_layout()
 
         self.update_indicator(self.current_floor)
+        
+        self.animation_job = None
+        self.target_y = None
 
     def create_layout(self):
 
@@ -118,6 +121,22 @@ class ElevatorApp(ctk.CTk):
             btn.pack(pady=3)
 
             self.internal_buttons[floor] = btn
+            
+        debug_frame = ctk.CTkFrame(self)
+        debug_frame.pack(side="bottom", pady=20)
+
+        debug_title = ctk.CTkLabel(debug_frame, text="Controller Debug", font=("Consolas", 18))
+
+        debug_title.pack(pady=5)
+
+        self.debug_box = ctk.CTkTextbox(debug_frame, width=500, height=180, font=("Consolas", 14))
+
+        self.debug_box.pack(padx=10, pady=10)
+    
+    def update_debug(self, text):
+
+        self.debug_box.delete("0.0", "end")
+        self.debug_box.insert("0.0", text)
 
     def update_indicator(self, current_floor):
 
@@ -139,26 +158,40 @@ class ElevatorApp(ctk.CTk):
 
         target_index = self.floor_positions[floor]
 
-        target_y = 10 + target_index * 42
+        self.target_y = 10 + target_index * 42
 
-        self.animate_step(target_y)
+        if self.animation_job is None: # detta fixar att animationen hakar4
+            self.animate_step()
 
-    def animate_step(self, target_y):
+    def animate_step(self):
 
-        distance = target_y - self.current_y
-
-        if abs(distance) < 0.5:
-            self.current_y = target_y
+        if self.target_y is None:
+            self.animation_job = None
             return
 
-        movement = distance * 0.08 #mjukare animationer
+        distance = self.target_y - self.current_y
 
-        if abs(movement) < 0.3: #minimal hastighet
-            movement = 0.3 if movement > 0 else -0.3
+        if abs(distance) < 0.5:
+
+            move_amount = self.target_y - self.current_y
+
+            self.canvas.move(self.box, 0, move_amount)
+
+            self.current_y = self.target_y
+
+            self.animation_job = None
+            return
+
+        movement = distance * 0.05 #mjukare animation
+
+        if abs(movement) < 0.2: #minimal hastighet
+            movement = 0.2 if movement > 0 else -0.2
 
         self.current_y += movement
+
         self.canvas.move(self.box, 0, movement)
-        self.after(16, lambda: self.animate_step(target_y))
+
+        self.animation_job = self.after(16, self.animate_step)
 
 
 if __name__ == "__main__":

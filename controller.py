@@ -17,6 +17,19 @@ class ElevatorController:
         self.running = False
 
         self.bind_buttons()
+    
+    def update_debug_terminal(self, target=None):
+
+        queue = sorted(list(self.requests))
+        debug_text = (
+            f"Current Floor : {self.app.current_floor}\n"
+            f"Direction     : {self.direction}\n"
+            f"Current Target: {target}\n"
+            f"Queue         : {queue}\n"
+            f"Queue Length  : {len(queue)}\n"
+            )
+
+        self.app.update_debug(debug_text)
 
     def bind_buttons(self):
 
